@@ -1,0 +1,35 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 28
+        versionCode 1
+        versionName "0.1"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation project(path: ':plugin')
+    implementation 'com.github.TeamNewPipe:NewPipeExtractor:66c3c3f45241d4b0c909'
+    implementation "com.squareup.okhttp3:okhttp:3.10.0"
+}
+
+repositories {
+    mavenCentral()
+}
