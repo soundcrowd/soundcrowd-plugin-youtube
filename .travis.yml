@@ -1,0 +1,13 @@
+language: android
+android:
+  components:
+  - build-tools-28.0.3
+  - android-28
+deploy:
+  provider: releases
+  api_key:
+    secure: Ref6eZ7hlFEeSsRX2cQw+C41sGCstTDuVg94qS1qI2UuV8ct8ahOSEOe6p4PbHwO44B+84l+T6pePlpkXtHAU3F38GQpwDP4Oq98cyDenfTe1W5srTb+havLj7qzt27FLLpncMMux7q+RSAE0aLaCiYvuSpkmBURmSmKJRsmXDk0dfWZ7ptmkvl1dj0+JsM6moLLSscZ4ZGBxNtcCVT2vt55WCEEdK/XcxeL8WRbHwoMextkRivM6fEeDzANhplykrXyPvuAZr3yDjK7KpFKvfQHkNCSEJBiDVTGJgL8I1Uh/OWAd4+SfJqfywDtervf6M+IeKhyKB8qU5VxbJ155uJA/c/bZwWimqBrS6LSj3Xfc/xck7KN4uc+0G0eEG4aded43YAzQhxNTv3JbREyTxtYOMG6+qxkAf0dt49uM0n3G96+Taoho/+0z+hN1mcCSzg97agRV4nY40oRN6l5XnfmJfewYtwhXbm0EGzNvOBTZYlshK/zqSooN3iPDQt/q7422TD4oAGb6WEeNAi218BapJmj8PKAz4XfRfZm/vvy+myZXesuWv2jO+yMatZZoxOQJ/GdJMq68/5CBfoh9KGDAE0awP6QX+K2UrOQD7fxahYEV2GiDenmXSCQXGR05WPV1TQCX69JEDvrLOFpmSZw8hDF4hSO1sg1L+3lG9o=
+  file: youtube/build/outputs/apk/release/youtube-release-unsigned.apk
+  skip_cleanup: true
+  on:
+    tags: true
