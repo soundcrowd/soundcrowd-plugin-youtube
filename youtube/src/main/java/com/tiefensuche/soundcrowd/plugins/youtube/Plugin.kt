@@ -5,6 +5,8 @@
 package com.tiefensuche.soundcrowd.plugins.youtube
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v4.media.MediaMetadataCompat
 import com.tiefensuche.soundcrowd.extensions.MediaMetadataCompatExt
 import com.tiefensuche.soundcrowd.plugins.Callback
@@ -19,33 +21,37 @@ import org.schabi.newpipe.extractor.ServiceList.YouTube
 import org.schabi.newpipe.extractor.exceptions.ExtractionException
 import org.schabi.newpipe.extractor.stream.Stream
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
+import org.schabi.newpipe.extractor.utils.Localization
 import java.io.IOException
 import java.util.*
 
 /**
  * YouTube plugin for soundcrowd
  */
-class Plugin(context: Context) : IPlugin {
+class Plugin(appContext: Context, context: Context) : IPlugin {
 
     companion object {
         private const val name = "YouTube"
     }
 
+    private val icon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.plugin_icon)
+
     private var query: String? = null
     private var nextPage: String? = null
 
     init {
-        NewPipe.init(Downloader())
+        NewPipe.init(Downloader(), Localization("DE", "DE"))
     }
 
     override fun name(): String = name
 
     override fun mediaCategories(): List<String> = listOf(name)
 
+    override fun preferences() = JSONArray()
+
     @Throws(Exception::class)
     override fun getMediaItems(mediaCategory: String, callback: Callback<JSONArray>) {
-        // empty result, only search is supported
-        callback.onResult(JSONArray())
+        callback.onResult(getTrending())
     }
 
     @Throws(Exception::class)
@@ -60,8 +66,14 @@ class Plugin(context: Context) : IPlugin {
     }
 
     @Throws(Exception::class)
-    override fun getMediaUrl(url: String, callback: Callback<String>) {
-        getStreams(url, callback)
+    override fun getMediaUrl(metadata: JSONObject, callback: Callback<JSONObject>) {
+        getStreams(metadata, callback)
+    }
+
+    private fun getTrending(): JSONArray {
+        val extractor = YouTube.kioskList.getExtractorById("Trending", null)
+        extractor.fetchPage()
+        return extractItems(extractor.initialPage.items)
     }
 
     @Throws(IOException::class, ExtractionException::class, JSONException::class)
@@ -71,12 +83,15 @@ class Plugin(context: Context) : IPlugin {
             return results
         }
 
+        val extractor = YouTube.getSearchExtractor(query)
+
         val itemsPage: ListExtractor.InfoItemsPage<InfoItem>
-        val extractor = YouTube.getSearchExtractor(query, "DE")
 
         if (!reset && query == this.query) {
+            // get next page from previous query
             itemsPage = extractor.getPage(nextPage)
         } else {
+            // new query, initial results
             this.query = query
             extractor.fetchPage()
             itemsPage = extractor.initialPage
@@ -84,16 +99,23 @@ class Plugin(context: Context) : IPlugin {
 
         nextPage = extractor.nextPageUrl
 
-        for (item in itemsPage.items) {
+        return extractItems(itemsPage.items)
+    }
+
+    private fun extractItems(items: List<InfoItem>): JSONArray {
+        val results = JSONArray()
+
+        for (item in items) {
             if (item is StreamInfoItem) {
                 val result = JSONObject()
-                result.put(MediaMetadataCompat.METADATA_KEY_TITLE, item.getName())
+                result.put(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, item.url.substring(item.url.indexOf('=')+1))
+                        .put(MediaMetadataCompat.METADATA_KEY_TITLE, item.getName())
                         .put(MediaMetadataCompat.METADATA_KEY_ARTIST, item.uploaderName)
                         .put(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, item.getUrl())
                         .put(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, item.getThumbnailUrl())
                         .put(MediaMetadataCompat.METADATA_KEY_DURATION, item.duration * 1000)
                         .put(MediaMetadataCompatExt.METADATA_KEY_SOURCE, name)
-                        .put(MediaMetadataCompatExt.METADATA_KEY_TYPE, MediaMetadataCompatExt.MediaType.MEDIA)
+                        .put(MediaMetadataCompatExt.METADATA_KEY_TYPE, MediaMetadataCompatExt.MediaType.MEDIA.name)
                 results.put(result)
             }
         }
@@ -102,8 +124,8 @@ class Plugin(context: Context) : IPlugin {
     }
 
     @Throws(ExtractionException::class, IOException::class)
-    private fun getStreams(url: String, callback: Callback<String>) {
-        val extractor = YouTube.getStreamExtractor(url)
+    private fun getStreams(url: JSONObject, callback: Callback<JSONObject>) {
+        val extractor = YouTube.getStreamExtractor(url.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI))
         extractor.fetchPage()
 
         val streams = ArrayList<Stream>()
@@ -111,9 +133,12 @@ class Plugin(context: Context) : IPlugin {
 
         for (stream in streams) {
             if (stream.getFormat().getName() == "m4a") {
-                callback.onResult(stream.getUrl())
-                break
+                callback.onResult(url.put(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, stream.getUrl().replace("signature", "sig")))
+                return
             }
         }
+        throw IllegalStateException("no audio stream")
     }
+
+    override fun getIcon() = icon
 }
