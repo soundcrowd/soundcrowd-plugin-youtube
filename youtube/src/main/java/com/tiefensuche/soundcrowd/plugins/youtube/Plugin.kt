@@ -17,11 +17,12 @@ import org.json.JSONObject
 import org.schabi.newpipe.extractor.InfoItem
 import org.schabi.newpipe.extractor.ListExtractor
 import org.schabi.newpipe.extractor.NewPipe
+import org.schabi.newpipe.extractor.Page
 import org.schabi.newpipe.extractor.ServiceList.YouTube
 import org.schabi.newpipe.extractor.exceptions.ExtractionException
+import org.schabi.newpipe.extractor.localization.Localization
 import org.schabi.newpipe.extractor.stream.Stream
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
-import org.schabi.newpipe.extractor.utils.Localization
 import java.io.IOException
 import java.util.*
 
@@ -37,10 +38,10 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
     private val icon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.plugin_icon)
 
     private var query: String? = null
-    private var nextPage: String? = null
+    private var nextPage: Page? = null
 
     init {
-        NewPipe.init(Downloader(), Localization("DE", "DE"))
+        NewPipe.init(Downloader(), Localization.DEFAULT)
     }
 
     override fun name(): String = name
@@ -50,19 +51,19 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
     override fun preferences() = JSONArray()
 
     @Throws(Exception::class)
-    override fun getMediaItems(mediaCategory: String, callback: Callback<JSONArray>) {
+    override fun getMediaItems(mediaCategory: String, callback: Callback<JSONArray>, refresh: Boolean) {
         callback.onResult(getTrending())
     }
 
     @Throws(Exception::class)
-    override fun getMediaItems(mediaCategory: String, path: String, callback: Callback<JSONArray>) {
+    override fun getMediaItems(mediaCategory: String, path: String, callback: Callback<JSONArray>, refresh: Boolean) {
         // empty result, only search is supported
         callback.onResult(JSONArray())
     }
 
     @Throws(Exception::class)
-    override fun getMediaItems(mediaCategory: String, path: String, query: String, callback: Callback<JSONArray>) {
-        callback.onResult(query(query, false))
+    override fun getMediaItems(mediaCategory: String, path: String, query: String, callback: Callback<JSONArray>, refresh: Boolean) {
+        callback.onResult(query(query, refresh))
     }
 
     @Throws(Exception::class)
@@ -79,12 +80,12 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
     @Throws(IOException::class, ExtractionException::class, JSONException::class)
     private fun query(query: String?, reset: Boolean): JSONArray {
         val results = JSONArray()
+
         if (query == null) {
             return results
         }
 
         val extractor = YouTube.getSearchExtractor(query)
-
         val itemsPage: ListExtractor.InfoItemsPage<InfoItem>
 
         if (!reset && query == this.query) {
@@ -97,7 +98,7 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
             itemsPage = extractor.initialPage
         }
 
-        nextPage = extractor.nextPageUrl
+        nextPage = itemsPage.nextPage
 
         return extractItems(itemsPage.items)
     }
@@ -138,6 +139,11 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
             }
         }
         throw IllegalStateException("no audio stream")
+    }
+
+    override fun favorite(id: String, callback: Callback<Boolean>) {
+        // not supported
+        callback.onResult(false)
     }
 
     override fun getIcon() = icon

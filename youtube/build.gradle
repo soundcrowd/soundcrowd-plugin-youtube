@@ -16,9 +16,14 @@ android {
         versionName "0.1"
     }
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -30,7 +35,8 @@ android {
 
 dependencies {
     implementation project(path: ':plugin')
-    implementation 'com.github.TeamNewPipe:NewPipeExtractor:e072bf6461b295'
+    implementation 'com.github.TeamNewPipe:NewPipeExtractor:v0.20.0'
+    implementation "com.squareup.okhttp3:okhttp:3.14.1"
 }
 
 repositories {
