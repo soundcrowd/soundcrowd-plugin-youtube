@@ -6,6 +6,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
+ext {
+    newpipe_version = "0.20.2"
+}
+
 android {
     compileSdkVersion 28
 
@@ -13,7 +17,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 28
         versionCode 1
-        versionName "0.1"
+        versionName newpipe_version
     }
 
     compileOptions {
@@ -24,7 +28,9 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            useProguard true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -35,7 +41,7 @@ android {
 
 dependencies {
     implementation project(path: ':plugin')
-    implementation 'com.github.TeamNewPipe:NewPipeExtractor:v0.20.2'
+    implementation "com.github.TeamNewPipe:NewPipeExtractor:v$newpipe_version"
     implementation "com.squareup.okhttp3:okhttp:3.14.1"
 }
 

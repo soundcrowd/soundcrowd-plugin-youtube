@@ -19,8 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class com.tiefensuche.soundcrowd.plugins.youtube.Plugin { *; }
+-keep class com.tiefensuche.soundcrowd.plugins.** { *; }
 -keep class org.schabi.newpipe.extractor.timeago.patterns.** { *; }
 -keep class org.mozilla.javascript.** { *; }
--dontobfuscate
+-optimizations !class/unboxing/enum
 -ignorewarnings
