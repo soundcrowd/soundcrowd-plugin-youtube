@@ -7,10 +7,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: build
-        run: ./gradlew buildDebug
-      - name: upload
-        uses: actions/upload-artifact@v1
+      - run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v1
         with:
           name: soundcrowd-plugin-youtube.apk
           path: youtube/build/outputs/apk/debug/youtube-debug.apk
