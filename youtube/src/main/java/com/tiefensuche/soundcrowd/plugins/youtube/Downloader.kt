@@ -4,7 +4,6 @@
 
 package com.tiefensuche.soundcrowd.plugins.youtube
 
-import android.text.TextUtils
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import org.schabi.newpipe.extractor.downloader.Request
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit
 class Downloader : org.schabi.newpipe.extractor.downloader.Downloader() {
 
     val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101 Firefox/68.0"
-    private val mCookies: String? = null
     private val client: OkHttpClient = OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS).build()
 
     override fun execute(request: Request): Response {
@@ -34,10 +32,6 @@ class Downloader : org.schabi.newpipe.extractor.downloader.Downloader() {
                 .method(httpMethod, requestBody).url(url)
                 .addHeader("User-Agent", USER_AGENT)
 
-        if (!TextUtils.isEmpty(mCookies)) {
-            requestBuilder.addHeader("Cookie", mCookies)
-        }
-
         for ((headerName, headerValueList) in headers) {
             if (headerValueList.size > 1) {
                 requestBuilder.removeHeader(headerName)
@@ -51,19 +45,20 @@ class Downloader : org.schabi.newpipe.extractor.downloader.Downloader() {
 
         val response = client.newCall(requestBuilder.build()).execute()
 
-        if (response.code() == 429) {
+        if (response.code == 429) {
             response.close()
             throw ReCaptchaException("reCaptcha Challenge requested", url)
         }
 
-        val body = response.body()
+        val body = response.body
         var responseBodyToReturn: String? = null
 
         if (body != null) {
             responseBodyToReturn = body.string()
         }
 
-        val latestUrl = response.request().url().toString()
-        return Response(response.code(), response.message(), response.headers().toMultimap(), responseBodyToReturn, latestUrl)
+        val latestUrl = response.request.url.toString()
+        return Response(response.code,
+            response.message, response.headers.toMultimap(), responseBodyToReturn, latestUrl)
     }
 }
