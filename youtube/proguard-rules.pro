@@ -22,5 +22,7 @@
 -keep class com.tiefensuche.soundcrowd.plugins.** { *; }
 -keep class org.schabi.newpipe.extractor.timeago.patterns.** { *; }
 -keep class org.mozilla.javascript.** { *; }
--optimizations !class/unboxing/enum
--ignorewarnings
+-keep class android.support.v4.media.** { *; }
+-keep class androidx.preference.** { *; }
+-keep class kotlin.** { *; }
+-dontobfuscate
