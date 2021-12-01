@@ -41,7 +41,7 @@ android {
 dependencies {
     implementation project(path: ':plugin')
     implementation "com.github.TeamNewPipe:NewPipeExtractor:v$newpipe_version"
-    implementation "com.squareup.okhttp3:okhttp:4.9.2"
+    implementation "com.squareup.okhttp3:okhttp:4.9.3"
 }
 
 repositories {
