@@ -8,7 +8,7 @@ plugins {
 }
 
 ext {
-    newpipe_version = "0.21.11"
+    newpipe_version = "0.22.1"
 }
 
 android {
