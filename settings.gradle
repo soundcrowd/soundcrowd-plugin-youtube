@@ -1,2 +1,1 @@
-include ':youtube', ':plugin'
-project(':plugin').projectDir = new File('plugin/plugin')
+include ':youtube'
