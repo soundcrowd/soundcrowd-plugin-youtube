@@ -8,7 +8,7 @@ plugins {
 }
 
 ext {
-    newpipe_version = "0.22.1"
+    newpipe_version = "0.22.2"
 }
 
 android {
@@ -40,12 +40,13 @@ android {
 
 dependencies {
     implementation 'com.tiefensuche.soundcrowd:plugin:0.1'
-    implementation "com.github.TeamNewPipe:NewPipeExtractor:v$newpipe_version"
+    implementation "com.github.TeamNewPipe.NewPipeExtractor:extractor:v$newpipe_version"
     implementation "com.squareup.okhttp3:okhttp:4.10.0"
 }
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
     maven {
         url = uri("https://maven.pkg.github.com/soundcrowd/soundcrowd-plugin")
         credentials {

@@ -117,8 +117,8 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
         val extractor = YouTube.getStreamExtractor(url)
         extractor.fetchPage()
         for (stream in extractor.audioStreams) {
-            if (stream.getFormat().getName() == "m4a") {
-                return stream.getUrl().replace("signature", "sig")
+            if (stream.format!!.getName() == "m4a") {
+                return stream.content.replace("signature", "sig")
             }
         }
         throw IllegalStateException("no audio stream")
