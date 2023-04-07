@@ -17,9 +17,9 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 33
-        versionCode 2
+        versionCode 3
         versionName newpipe_version
-        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
 
     compileOptions {
