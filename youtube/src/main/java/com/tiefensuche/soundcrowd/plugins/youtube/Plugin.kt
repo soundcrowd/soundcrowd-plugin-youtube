@@ -20,6 +20,7 @@ import org.schabi.newpipe.extractor.Page
 import org.schabi.newpipe.extractor.ServiceList.YouTube
 import org.schabi.newpipe.extractor.exceptions.ExtractionException
 import org.schabi.newpipe.extractor.localization.Localization
+import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory.MUSIC_SONGS
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import java.io.IOException
 import java.util.*
@@ -75,7 +76,7 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
             return emptyList()
         }
 
-        val extractor = YouTube.getSearchExtractor(query)
+        val extractor = YouTube.getSearchExtractor(query, listOf(MUSIC_SONGS), "")
         val itemsPage: ListExtractor.InfoItemsPage<InfoItem>
 
         if (!reset && query == this.query) {
