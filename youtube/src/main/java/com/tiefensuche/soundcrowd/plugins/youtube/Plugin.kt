@@ -103,7 +103,7 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
                         .putString(MediaMetadataCompat.METADATA_KEY_TITLE, item.getName())
                         .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, item.uploaderName)
                         .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, item.getUrl())
-                        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, item.getThumbnailUrl())
+                        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, item.thumbnails[0].url)
                         .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, item.duration * 1000)
                         .putString(MediaMetadataCompatExt.METADATA_KEY_TYPE, MediaMetadataCompatExt.MediaType.MEDIA.name)
                     .build())
