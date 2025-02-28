@@ -42,7 +42,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.tiefensuche.soundcrowd:plugin:0.1'
+    implementation 'com.tiefensuche.soundcrowd:plugin:1.0.0'
     implementation "com.github.TeamNewPipe.NewPipeExtractor:extractor:v$newpipe_version"
     implementation "com.squareup.okhttp3:okhttp:4.10.0"
 }
