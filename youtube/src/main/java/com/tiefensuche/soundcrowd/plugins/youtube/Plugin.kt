@@ -7,12 +7,11 @@ package com.tiefensuche.soundcrowd.plugins.youtube
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaDataSource
-import android.support.v4.media.MediaMetadataCompat
-import com.tiefensuche.soundcrowd.extensions.MediaMetadataCompatExt
-import com.tiefensuche.soundcrowd.plugins.Callback
+import android.net.Uri
 import com.tiefensuche.soundcrowd.plugins.IPlugin
 import org.json.JSONException
+import androidx.media3.common.MediaItem
+import com.tiefensuche.soundcrowd.plugins.MediaItemUtils
 import org.schabi.newpipe.extractor.InfoItem
 import org.schabi.newpipe.extractor.ListExtractor
 import org.schabi.newpipe.extractor.NewPipe
@@ -20,7 +19,9 @@ import org.schabi.newpipe.extractor.Page
 import org.schabi.newpipe.extractor.ServiceList.YouTube
 import org.schabi.newpipe.extractor.exceptions.ExtractionException
 import org.schabi.newpipe.extractor.localization.Localization
+import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory.ALL
 import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory.MUSIC_SONGS
+import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory.MUSIC_VIDEOS
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import java.io.IOException
 import java.util.*
@@ -28,13 +29,17 @@ import java.util.*
 /**
  * YouTube plugin for soundcrowd
  */
-class Plugin(appContext: Context, context: Context) : IPlugin {
+class Plugin(context: Context) : IPlugin {
 
     companion object {
-        private const val name = "YouTube"
+        private const val NAME = "YouTube"
+        private const val SEARCH_ALL = "All"
+        private const val SEARCH_TRACKS = "YouTube Music Tracks"
+        private const val SEARCH_VIDEOS = "YouTube Music Videos"
+        private val searchCategories = listOf(SEARCH_ALL, SEARCH_TRACKS, SEARCH_VIDEOS)
     }
 
-    private val icon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.plugin_icon)
+    private val icon: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.icon_plugin_youtube)
 
     private var query: String? = null
     private var nextPage: Page? = null
@@ -43,40 +48,51 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
         NewPipe.init(Downloader(), Localization.DEFAULT)
     }
 
-    override fun name(): String = name
+    override fun name(): String = NAME
 
-    override fun mediaCategories(): List<String> = listOf(name)
+    override fun mediaCategories(): List<String> = listOf(NAME)
 
     @Throws(Exception::class)
-    override fun getMediaItems(mediaCategory: String, callback: Callback<List<MediaMetadataCompat>>, refresh: Boolean) {
-        callback.onResult(getTrending())
+    override fun getMediaItems(mediaCategory: String, refresh: Boolean): List<MediaItem> {
+        return getTrending()
     }
 
     @Throws(Exception::class)
-    override fun getMediaItems(mediaCategory: String, path: String, query: String, callback: Callback<List<MediaMetadataCompat>>, refresh: Boolean) {
-        callback.onResult(query(query, refresh))
+    override fun getMediaItems(mediaCategory: String, path: String, query: String, type: String, refresh: Boolean): List<MediaItem> {
+        return query(query, when (type) {
+            SEARCH_ALL -> ALL
+            SEARCH_TRACKS -> MUSIC_SONGS
+            SEARCH_VIDEOS -> MUSIC_VIDEOS
+            else -> ALL
+        }, refresh)
     }
 
     @Throws(Exception::class)
-    override fun getMediaUrl(metadata: MediaMetadataCompat, callback: Callback<Pair<MediaMetadataCompat, MediaDataSource?>>) {
-        callback.onResult(Pair(MediaMetadataCompat.Builder(metadata)
-            .putString(MediaMetadataCompatExt.METADATA_KEY_DOWNLOAD_URL,
-                getAudioStream(metadata.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI))).build(), null))
+    override fun getMediaUri(mediaItem: MediaItem): Uri {
+        return Uri.parse(getAudioStream(mediaItem.requestMetadata.mediaUri.toString()))
     }
 
-    private fun getTrending(): List<MediaMetadataCompat> {
+    override fun getSuggestions(category: String, query: String): List<String> {
+        return YouTube.suggestionExtractor.suggestionList(query)
+    }
+
+    override fun searchCategories(): List<String> {
+        return searchCategories
+    }
+
+    private fun getTrending(): List<MediaItem> {
         val extractor = YouTube.kioskList.getExtractorById("Trending", null)
         extractor.fetchPage()
         return extractItems(extractor.initialPage.items)
     }
 
     @Throws(IOException::class, ExtractionException::class, JSONException::class)
-    private fun query(query: String?, reset: Boolean): List<MediaMetadataCompat> {
+    private fun query(query: String?, type: String, reset: Boolean): List<MediaItem> {
         if (query == null) {
             return emptyList()
         }
 
-        val extractor = YouTube.getSearchExtractor(query, listOf(MUSIC_SONGS), "")
+        val extractor = YouTube.getSearchExtractor(query, listOf(type), "")
         val itemsPage: ListExtractor.InfoItemsPage<InfoItem>
 
         if (!reset && query == this.query) {
@@ -94,24 +110,22 @@ class Plugin(appContext: Context, context: Context) : IPlugin {
         return extractItems(itemsPage.items)
     }
 
-    private fun extractItems(items: List<InfoItem>): List<MediaMetadataCompat> {
-        val results = LinkedList<MediaMetadataCompat>()
+    private fun extractItems(items: List<InfoItem>): List<MediaItem> {
+        val results = LinkedList<MediaItem>()
         for (item in items) {
             if (item is StreamInfoItem) {
-                results.add(MediaMetadataCompat.Builder()
-                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, item.url.substring(item.url.indexOf('=')+1))
-                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, item.getName())
-                        .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, item.uploaderName)
-                        .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, item.getUrl())
-                        .putString(
-                            MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,
-                            item.thumbnails.maxBy {
-                                it.width * it.height
-                            }.url
-                        )
-                        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, item.duration * 1000)
-                        .putString(MediaMetadataCompatExt.METADATA_KEY_TYPE, MediaMetadataCompatExt.MediaType.MEDIA.name)
-                    .build())
+                results.add(
+                    MediaItemUtils.createMediaItem(
+                        item.url.substringAfterLast('='),
+                        Uri.parse(item.getUrl()),
+                        item.getName(),
+                        item.duration * 1000,
+                        item.uploaderName,
+                        artworkUri = Uri.parse(item.thumbnails.maxBy {
+                            it.width * it.height
+                        }.url)
+                    )
+                )
             }
         }
 

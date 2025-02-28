@@ -3,12 +3,8 @@
  */
 
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'kotlin-android'
-}
-
-ext {
-    newpipe_version = "0.23.1"
 }
 
 android {
@@ -17,27 +13,21 @@ android {
         compileSdk 35
         minSdk 21
         targetSdk 35
-        versionCode 4
-        versionName newpipe_version
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        consumerProguardFiles 'proguard-rules.pro'
     }
 
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = "17"
-    }
-
-    buildTypes {
-        debug {
-            minifyEnabled false
-        }
-
-        release {
-            minifyEnabled true
-        }
     }
 }
 
@@ -49,6 +39,7 @@ dependencies {
 
 repositories {
     mavenCentral()
+    google()
     maven { url 'https://jitpack.io' }
     maven {
         url = uri("https://maven.pkg.github.com/soundcrowd/soundcrowd-plugin")

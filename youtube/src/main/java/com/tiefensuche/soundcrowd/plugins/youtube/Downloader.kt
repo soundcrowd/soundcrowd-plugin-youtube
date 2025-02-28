@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class Downloader : org.schabi.newpipe.extractor.downloader.Downloader() {
 
-    val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101 Firefox/68.0"
+    private val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101 Firefox/68.0"
     private val client: OkHttpClient = OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS).build()
 
     override fun execute(request: Request): Response {
