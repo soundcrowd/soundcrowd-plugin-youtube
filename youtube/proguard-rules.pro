@@ -25,4 +25,6 @@
 -keep class android.support.v4.media.** { *; }
 -keep class androidx.preference.** { *; }
 -keep class kotlin.** { *; }
+-dontwarn java.**
+-dontwarn javax.**
 -dontobfuscate
