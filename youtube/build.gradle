@@ -7,18 +7,14 @@ plugins {
     id 'kotlin-android'
 }
 
-ext {
-    newpipe_version = "0.23.1"
-}
-
 android {
     defaultConfig {
         namespace 'com.tiefensuche.soundcrowd.plugins.youtube'
         compileSdk 35
         minSdk 21
         targetSdk 35
-        versionCode 4
-        versionName newpipe_version
+        versionCode 5
+        versionName "1.0.0"
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
 
