@@ -81,7 +81,7 @@ class Plugin(context: Context) : IPlugin {
     }
 
     private fun getTrending(): List<MediaItem> {
-        val extractor = YouTube.kioskList.getExtractorById("Trending", null)
+        val extractor = YouTube.kioskList.getExtractorById("trending_music", null)
         extractor.fetchPage()
         return extractItems(extractor.initialPage.items)
     }
