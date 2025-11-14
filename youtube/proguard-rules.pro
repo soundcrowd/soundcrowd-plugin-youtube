@@ -25,3 +25,4 @@
 -dontwarn java.awt.**
 -dontwarn java.beans.**
 -dontwarn javax.**
+-dontwarn jdk.dynalink.**
