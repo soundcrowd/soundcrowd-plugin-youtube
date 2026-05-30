@@ -136,7 +136,9 @@ class Plugin(context: Context) : IPlugin {
     private fun getAudioStream(url: String): String {
         val extractor = YouTube.getStreamExtractor(url)
         extractor.fetchPage()
-        return extractor.audioStreams.maxBy { it.averageBitrate }.content
+        if (extractor.audioStreams.isNotEmpty())
+            return extractor.audioStreams.maxBy { it.averageBitrate }.content
+        return extractor.videoStreams.maxBy { it.bitrate }.content
     }
 
     override fun getIcon(): Bitmap = icon
